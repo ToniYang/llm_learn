@@ -40,15 +40,13 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    subgraph Self-Attention
-        Q[Query (Q)] --> S[点积]
-        K[Key (K)] --> S
-        S --> Sc[缩放]
-        Sc --> M[掩码 Masking]
-        M --> SM[Softmax]
-        SM --> W[加权求和]
-        V[Value (V)] --> W
-    end
+    Q[Query (Q)] --> S[点积 Q·K]
+    K[Key (K)] --> S
+    S --> Sc[缩放]
+    Sc --> M[掩码 Masking]
+    M --> SM[Softmax]
+    SM --> W[加权求和]
+    V[Value (V)] --> W
 ```
 
 - **Q（查询）**：当前词元想要什么信息
@@ -62,47 +60,95 @@ flowchart TD
 4. Softmax 得到权重
 5. 权重与 V 加权求和，得到输出
 
-#### 矩阵计算例子
-假设有 3 个词元，每个向量维度为 4：
+#### 矩阵计算直观例子
+
+假设有 2 个词元，每个向量维度为 2，Q、K、V 如下：
 
 - Q（查询矩阵）：
-\[
-Q = \begin{bmatrix}
-1 & 0 & 1 & 0 \\
-0 & 1 & 0 & 1 \\
-1 & 1 & 1 & 1
-\end{bmatrix}
-\]
+  \[
+  Q = \begin{bmatrix}
+  1 & 0 \\
+  0 & 1
+  \end{bmatrix}
+  \]
 - K（键矩阵）：
-\[
-K = \begin{bmatrix}
-1 & 0 & 1 & 0 \\
-0 & 1 & 0 & 1 \\
-1 & 1 & 1 & 1
-\end{bmatrix}
-\]
+  \[
+  K = \begin{bmatrix}
+  1 & 0 \\
+  0 & 1
+  \end{bmatrix}
+  \]
 - V（值矩阵）：
+  \[
+  V = \begin{bmatrix}
+  1 & 2 \\
+  3 & 4
+  \end{bmatrix}
+  \]
+
+**步骤1：计算 Q 与 K 的点积（QK^T）**
+
 \[
-V = \begin{bmatrix}
-0.1 & 0.2 & 0.3 & 0.4 \\
-0.5 & 0.6 & 0.7 & 0.8 \\
-0.9 & 1.0 & 1.1 & 1.2
+QK^T = \begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+=
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
 \end{bmatrix}
 \]
 
-1. **点积计算**：
-   \[
-   \text{Attention Scores} = Q \cdot K^T
-   \]
-2. **缩放**：
-   \[
-   \text{Scaled Scores} = \frac{Q \cdot K^T}{\sqrt{4}}
-   \]
-3. **Softmax**：对每一行做 softmax，得到权重。
-4. **加权求和**：
-   \[
-   \text{Attention Output} = \text{Softmax(Scaled Scores)} \cdot V
-   \]
+**步骤2：缩放（假设 d_k=2）**
+
+\[
+\text{Scaled Scores} = \frac{QK^T}{\sqrt{2}} = \frac{1}{1.414}
+\begin{bmatrix}
+1 & 0 \\
+0 & 1
+\end{bmatrix}
+\approx
+\begin{bmatrix}
+0.71 & 0 \\
+0 & 0.71
+\end{bmatrix}
+\]
+
+**步骤3：对每一行做 Softmax**
+
+- 第一行：Softmax(0.71, 0) ≈ (0.67, 0.33)
+- 第二行：Softmax(0, 0.71) ≈ (0.33, 0.67)
+
+\[
+\text{Softmax结果} =
+\begin{bmatrix}
+0.67 & 0.33 \\
+0.33 & 0.67
+\end{bmatrix}
+\]
+
+**步骤4：加权求和 Softmax × V**
+
+- 第一行：0.67×[1,2] + 0.33×[3,4] = [0.67×1+0.33×3, 0.67×2+0.33×4] = [1.66, 2.66]
+- 第二行：0.33×[1,2] + 0.67×[3,4] = [0.33×1+0.67×3, 0.33×2+0.67×4] = [2.34, 3.34]
+
+\[
+\text{最终输出} =
+\begin{bmatrix}
+1.66 & 2.66 \\
+2.34 & 3.34
+\end{bmatrix}
+\]
+
+---
+
+**总结**：  
+每个词元的输出是所有值向量的加权和，权重由 Softmax 后的注意力分数决定。这样，模型可以"关注"到序列中最相关的信息。
 
 ### 2.2 多头注意力 (Multi-Head Attention, MHA)
 - 并行执行多组 QKV 投影，关注不同子空间信息
