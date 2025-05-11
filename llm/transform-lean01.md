@@ -40,12 +40,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Q[Query (Q)] --> S[点积 Q·K]
+    Q[Query (Q)] --> S[Dot Product]
     K[Key (K)] --> S
-    S --> Sc[缩放]
-    Sc --> M[掩码 Masking]
+    S --> Sc[Scaling]
+    Sc --> M[Masking]
     M --> SM[Softmax]
-    SM --> W[加权求和]
+    SM --> W[Weighted Sum]
     V[Value (V)] --> W
 ```
 
@@ -61,6 +61,8 @@ flowchart TD
 5. 权重与 V 加权求和，得到输出
 
 #### 矩阵计算直观例子
+
+image.png
 
 假设有 2 个词元，每个向量维度为 2，Q、K、V 如下：
 
