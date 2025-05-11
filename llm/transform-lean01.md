@@ -40,13 +40,12 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    Q[Query (Q)] --> S[Dot Product]
-    K[Key (K)] --> S
-    S --> Sc[Scaling]
-    Sc --> M[Masking]
-    M --> SM[Softmax]
-    SM --> W[Weighted Sum]
-    V[Value (V)] --> W
+    QKV[输入 Q, K, V] --> DP[Dot Product (Q × K^T)]
+    DP --> SC[Scaling]
+    SC --> MSK[Masking]
+    MSK --> SM[Softmax]
+    SM --> WS[Weighted Sum with V]
+    WS --> OUT[输出]
 ```
 
 - **Q（查询）**：当前词元想要什么信息
