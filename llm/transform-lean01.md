@@ -9,8 +9,7 @@
 
 ```mermaid
 flowchart TD
-    B[输入embedding层(词+位置)]
-    B --> C[Transformer 层（多层堆叠）]
+    B[输入embedding层(词+位置)] --> C[Transformer 层（多层堆叠）]
     C --> D[输出层（线性变换）]
     D --> E[Softmax 层]
 ```
